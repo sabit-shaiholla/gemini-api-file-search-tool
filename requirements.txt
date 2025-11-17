@@ -1,0 +1,4 @@
+# Legacy compatibility file. Regenerate via `uv pip compile pyproject.toml --output requirements.txt` if needed.
+streamlit>=1.38.0
+google-genai>=0.2.2
+python-dotenv>=1.0.1
