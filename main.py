@@ -85,8 +85,13 @@ def handle_upload_flow(sidebar_event: SidebarEvent, lang: str) -> None:
             st.error(get_text("error_save_file", lang).format(exc))
             return
 
-        client = ensure_client(api_key, st.session_state.get("client"))
+        client = ensure_client(
+            api_key,
+            st.session_state.get("client"),
+            st.session_state.get("client_api_key"),
+        )
         st.session_state["client"] = client
+        st.session_state["client_api_key"] = api_key
         store_name = build_store_name()
 
         try:
@@ -165,7 +170,12 @@ def ensure_api_key(lang: str) -> bool:
         st.warning(get_text("api_key_required", lang))
         return False
     try:
-        st.session_state["client"] = ensure_client(api_key, st.session_state.get("client"))
+        st.session_state["client"] = ensure_client(
+            api_key,
+            st.session_state.get("client"),
+            st.session_state.get("client_api_key"),
+        )
+        st.session_state["client_api_key"] = api_key
     except Exception:
         st.error(get_text("error_api_key", lang))
         return False

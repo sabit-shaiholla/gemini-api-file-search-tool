@@ -23,8 +23,12 @@ def build_store_name(prefix: str = STORE_NAME_PREFIX) -> str:
     return f"{prefix}-{generate_random_id()}"
 
 
-def ensure_client(api_key: str, existing_client: Optional[genai.Client] = None) -> genai.Client:
-    if existing_client is not None:
+def ensure_client(
+    api_key: str,
+    existing_client: Optional[genai.Client] = None,
+    existing_api_key: Optional[str] = None,
+) -> genai.Client:
+    if existing_client is not None and existing_api_key == api_key:
         return existing_client
     return genai.Client(api_key=api_key)
 

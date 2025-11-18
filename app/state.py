@@ -11,6 +11,7 @@ SESSION_DEFAULTS: dict[str, Any] = {
     "uploaded_filename": None,
     "uploaded_path": None,
     "client": None,
+    "client_api_key": None,
     "model": "gemini-2.5-flash",
     "api_key": None,
 }
