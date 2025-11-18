@@ -60,7 +60,7 @@ jobs:
 
             APP_DIR="${REMOTE_APP_DIR:-$HOME/gemini-api-file-search-tool}"
             SERVICE_NAME="${REMOTE_SERVICE:-streamlit}"
-            BRANCH="${TARGET_BRANCH:-main}"
+            BRANCH="${TARGET_BRANCH:-master}"
 
             if [ ! -d "$APP_DIR/.git" ]; then
               git clone "https://github.com/${REPO}" "$APP_DIR"
