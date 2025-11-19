@@ -1,15 +1,19 @@
-# Gemini PDF Chat
+# Gemini API File Search Tool - RAG-as-a-Service
 
 A professional, secure, and efficient tool to interact with your PDF documents using Google's advanced Gemini models. This application leverages the power of **Retrieval-Augmented Generation (RAG)** via the Gemini File Search API to provide accurate, context-aware answers from your uploaded files.
 
-## How It Works
+> **Read the full article:** [Revolutionizing RAG: Why Gemini File Search Tool is the great RAG-as-a-Service](https://sabit-shaiholla.github.io/portfolio/gemini-api-file-search-tool/)
+>
+> **Live Demo:** [https://filequerysystem.duckdns.org/](https://filequerysystem.duckdns.org/)
 
-This tool simplifies the complex process of document analysis. Instead of pasting text or worrying about token limits, you simply upload your PDF. We handle the rest using a sophisticated pipeline:
+## How It Works: Semantic Search and Managed Indexing
 
-1.  **Secure Upload**: Your file is temporarily staged and securely uploaded to a private Google Gemini File Search store.
-2.  **Indexing**: Google's infrastructure processes and indexes the content, making it semantically searchable.
-3.  **Retrieval-Augmented Generation (RAG)**: When you ask a question, the system searches your document for relevant sections and provides them to the Gemini model.
-4.  **Intelligent Response**: The model synthesizes an answer based *only* on the information found in your document, citing its sources.
+This tool simplifies the complex process of document analysis by abstracting away the entire retrieval pipeline. Instead of managing vector databases and chunking strategies yourself, the Gemini File Search API handles it all:
+
+1.  **Secure Upload & Indexing**: When you upload a file, it is securely transferred to a private Google Gemini File Search store. The system automatically chunks the document, embeds it using powerful models (like `gemini-embedding-001`), and indexes it for semantic search.
+2.  **Semantic Retrieval**: Unlike keyword search, the system understands the deeper meaning of your query. It performs a vector search to find the most relevant document chunks.
+3.  **Retrieval-Augmented Generation (RAG)**: The retrieved context is passed to the Gemini model, which synthesizes an answer based *only* on the information found in your document.
+4.  **Built-in Verification**: The model's responses include "grounding metadata" (citations), showing exactly which parts of your document were used to generate the answer.
 
 ```mermaid
 sequenceDiagram
@@ -19,19 +23,43 @@ sequenceDiagram
     
     User->>App: Upload PDF
     App->>Gemini: Create Store & Upload File
-    Gemini-->>App: Indexing Complete
+    Gemini-->>App: Indexing Complete (Embeddings Created)
     
     User->>App: Ask Question
     App->>Gemini: Query (Prompt + File Search Tool)
-    Gemini->>Gemini: Retrieve Relevant Chunks
+    Gemini->>Gemini: Semantic Search & Retrieval
     Gemini->>Gemini: Generate Answer with Citations
     Gemini-->>App: Response + Source Metadata
     App-->>User: Display Answer & Sources
 ```
 
+## Key Advantages
+
+### 💰 Unbeatable Pricing Model
+The pricing structure addresses major bottlenecks in managed RAG solutions:
+*   **Storage is free.**
+*   **Query time embeddings are free.**
+*   You only pay for embeddings at initial indexing time ($0.15 per 1 million tokens).
+*   Retrieved document tokens are charged as regular context tokens.
+
+### 🔄 Flexibility and Management
+*   **Persistent Stores**: Unlike temporary file uploads, File Search stores persist indefinitely until you delete them.
+*   **Dynamic Updates**: You can progressively add or remove files from an existing knowledge base.
+*   **Metadata Filtering**: Apply custom metadata to files for fine-grained control during retrieval (e.g., searching only within specific document subsets).
+
+### ✅ Trust and Verification
+*   **Auto-citation**: Built-in citations help prevent hallucinations by pointing users to the exact source text used for the answer.
+
+## Limitations and Considerations
+
+*   **File Size**: Maximum 100 MB per document.
+*   **Store Size**: Up to 1 TB (Tier 3), but keeping individual stores under 20 GB is recommended for optimal latency.
+*   **Chunk Control**: Limited ability to adjust the number of chunks retrieved.
+*   **Supported Models**: Currently supported by `gemini-1.5-pro` and `gemini-1.5-flash` (and newer preview models).
+
 ## Features
 
-*   **State-of-the-Art Models**: Support for **Gemini 3.0 Pro Preview** (`gemini-3-pro-preview`) for advanced reasoning, alongside `gemini-1.5-pro` and `gemini-1.5-flash`.
+*   **State-of-the-Art Models**: Support for **Gemini 2.5 Pro Preview** for advanced reasoning, alongside `gemini-2.5-flash`.
 *   **Secure by Design**: API keys are stored only in your session. Files and vector stores are automatically cleaned up when you reset or exit.
 *   **Transparent Citations**: Every answer comes with a "View Sources" expandable, showing exactly which parts of your document were used.
 *   **User-Centric UI**: A clean, responsive interface built with Streamlit, featuring drag-and-drop uploads and chat history.
