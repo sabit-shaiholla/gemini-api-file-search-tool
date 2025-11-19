@@ -4,7 +4,7 @@ from typing import Dict
 
 TRANSLATIONS: Dict[str, Dict[str, str]] = {
     "en": {
-        "page_title": "PDF Chat with Gemini",
+        "page_title": "File Query System with Gemini",
         "page_icon": "📄",
         "main_title": "Chat with your PDF using Google Gemini",
         "subtitle": "Upload a PDF and start asking questions!",

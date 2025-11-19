@@ -10,7 +10,7 @@ load_dotenv()
 class Config:
     """Application configuration."""
     
-    PAGE_TITLE: Final[str] = "Gemini PDF Chat"
+    PAGE_TITLE: Final[str] = "File Query System with Gemini"
     PAGE_ICON: Final[str] = "🤖"
     
     # Model Configuration
