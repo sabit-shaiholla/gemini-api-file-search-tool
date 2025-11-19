@@ -31,7 +31,7 @@ sequenceDiagram
 
 ## Features
 
-*   **State-of-the-Art Models**: Choose between `gemini-3.0-pro` for deep reasoning or `gemini-2.5-flash` for lightning-fast responses.
+*   **State-of-the-Art Models**: Choose between `gemini-2.5-pro` for deep reasoning or `gemini-2.5-flash` for lightning-fast responses.
 *   **Secure by Design**: API keys are stored only in your session. Files and vector stores are automatically cleaned up when you reset or exit.
 *   **Transparent Citations**: Every answer comes with a "View Sources" expandable, showing exactly which parts of your document were used.
 *   **User-Centric UI**: A clean, responsive interface built with Streamlit, featuring drag-and-drop uploads and chat history.
