@@ -3,40 +3,28 @@ from __future__ import annotations
 import streamlit as st
 from dotenv import load_dotenv
 
-from app.conversation import build_conversation_contents, parse_response
-from app.file_search import (
-    build_store_name,
-    cleanup_store,
-    create_file_search_store,
-    ensure_client,
-    query_file_search,
-    upload_file_to_store,
-)
-from app.localization import get_text
-from app.pdf_utils import cleanup_local_file, save_uploaded_file
-from app.state import append_chat_message, init_session_state, reset_uploaded_pdf_state
-from app.ui import SidebarEvent, render_chat_history, render_sidebar, render_sources_section
+from app.core.config import Config
+from app.core.exceptions import GeminiServiceError, FileUploadError
+from app.core.state import append_chat_message, init_session_state, reset_uploaded_pdf_state
+from app.services.gemini_service import GeminiService
+from app.services.pdf_service import PDFService
+from app.ui.components import SidebarEvent, render_chat_history, render_sidebar, render_sources_section
+from app.utils.conversation import build_conversation_contents, parse_response
+from app.utils.localization import get_text
 
 load_dotenv()
-
-MODEL_OPTIONS = [
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
-    "gemini-2.5-pro",
-    "gemini-3.0-pro-review"
-]
 
 
 def main() -> None:
     st.set_page_config(
-        page_title=get_text("page_title"),
-        page_icon=get_text("page_icon"),
+        page_title=Config.PAGE_TITLE,
+        page_icon=Config.PAGE_ICON,
         layout="wide",
     )
 
     init_session_state()
 
-    sidebar_event = render_sidebar(MODEL_OPTIONS)
+    sidebar_event = render_sidebar(Config.MODEL_OPTIONS)
     lang = sidebar_event.language
 
     handle_upload_flow(sidebar_event, lang)
@@ -77,35 +65,35 @@ def handle_upload_flow(sidebar_event: SidebarEvent, lang: str) -> None:
     existing_client = st.session_state.get("client")
     if existing_store and existing_client:
         safe_cleanup_remote_store(existing_client, existing_store, lang, bubble_up=False)
-    cleanup_local_file(st.session_state.get("uploaded_path"))
+    PDFService.cleanup_local_file(st.session_state.get("uploaded_path"))
 
     with st.spinner(get_text("processing", lang)):
         try:
-            saved_path = save_uploaded_file(uploaded_file)
-        except RuntimeError as exc:
+            saved_path = PDFService.save_uploaded_file(uploaded_file)
+        except FileUploadError as exc:
             st.error(get_text("error_save_file", lang).format(exc))
             return
 
-        client = ensure_client(
+        client = GeminiService.ensure_client(
             api_key,
             st.session_state.get("client"),
             st.session_state.get("client_api_key"),
         )
         st.session_state["client"] = client
         st.session_state["client_api_key"] = api_key
-        store_name = build_store_name()
+        store_name = GeminiService.build_store_name()
 
         try:
-            store = create_file_search_store(client, store_name)
-        except Exception as exc:
-            cleanup_local_file(saved_path)
+            store = GeminiService.create_file_search_store(client, store_name)
+        except GeminiServiceError as exc:
+            PDFService.cleanup_local_file(saved_path)
             st.error(get_text("error_create_store", lang).format(exc))
             return
 
         try:
-            upload_file_to_store(client, store.name, saved_path, uploaded_file.name)
-        except Exception as exc:
-            cleanup_local_file(saved_path)
+            GeminiService.upload_file_to_store(client, store.name, saved_path, uploaded_file.name)
+        except GeminiServiceError as exc:
+            PDFService.cleanup_local_file(saved_path)
             safe_cleanup_remote_store(client, store.name, lang, bubble_up=False)
             st.error(get_text("error_upload_store", lang).format(exc))
             return
@@ -122,7 +110,7 @@ def handle_clear_flow(lang: str) -> None:
     store_name = st.session_state.get("store_name")
     if client and store_name:
         safe_cleanup_remote_store(client, store_name, lang)
-    cleanup_local_file(st.session_state.get("uploaded_path"))
+    PDFService.cleanup_local_file(st.session_state.get("uploaded_path"))
     reset_uploaded_pdf_state()
     st.rerun()
 
@@ -145,13 +133,13 @@ def handle_chat_flow(lang: str) -> None:
     with st.chat_message("assistant"):
         with st.spinner(get_text("thinking", lang)):
             try:
-                response = query_file_search(
+                response = GeminiService.query_file_search(
                     st.session_state["client"],
                     conversation,
                     st.session_state["store_name"],
                     st.session_state["model"],
                 )
-            except Exception as exc:
+            except GeminiServiceError as exc:
                 st.error(get_text("error_query", lang).format(exc))
                 append_chat_message("assistant", get_text("error_response", lang))
                 return
@@ -171,7 +159,7 @@ def ensure_api_key(lang: str) -> bool:
         st.warning(get_text("api_key_required", lang))
         return False
     try:
-        st.session_state["client"] = ensure_client(
+        st.session_state["client"] = GeminiService.ensure_client(
             api_key,
             st.session_state.get("client"),
             st.session_state.get("client_api_key"),
@@ -185,12 +173,11 @@ def ensure_api_key(lang: str) -> bool:
 
 def safe_cleanup_remote_store(client, store_name: str, lang: str | None, bubble_up: bool = True) -> None:
     try:
-        cleanup_store(client, store_name)
-    except Exception as exc:
+        GeminiService.cleanup_store(client, store_name)
+    except GeminiServiceError as exc:
         if bubble_up:
             st.error(get_text("error_cleanup", lang or "en").format(exc))
 
 
 if __name__ == "__main__":
     main()
-

@@ -1,4 +1,5 @@
-from __future__ import annotations
+from app.core.config import Config
+from app.utils.localization import get_text
 
 from typing import Any
 

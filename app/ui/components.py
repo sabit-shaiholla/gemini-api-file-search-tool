@@ -7,7 +7,8 @@ from typing import Optional
 import streamlit as st
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 
-from app.localization import TRANSLATIONS, get_text
+from app.core.config import Config
+from app.utils.localization import TRANSLATIONS, get_text
 
 
 @dataclass(slots=True)

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Iterable, List, Sequence
 
 from google.genai import types
+from app.utils.localization import get_text
 
 
 def _as_iterable(value: Any) -> List[Any]:
